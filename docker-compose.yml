@@ -1,7 +1,12 @@
 version: "3.9"
 services:
-  web:
-    build: .
+  nginx:
+    image: nginx
+    container_name: nginx-irestore
+    links:
+    - irestore
+    volumes:
+    - ./default.conf:/etc/nginx/conf.d/default.conf
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.nginx-irestore-http.middlewares=redirect-to-https"
@@ -10,12 +15,10 @@ services:
     - "traefik.http.routers.nginx-irestore.rule=Host(`api-irestore.mdhtcdn.net`)"
     - "traefik.http.routers.nginx-irestore.tls=true"
     - "traefik.http.routers.nginx-irestore.tls.certresolver=leresolver"
+  irestore:
+    build: .
     networks:
       - web
-  redis:
-    image: "redis:alpine"
-    networks:
-    - web
 networks:
   web:
 

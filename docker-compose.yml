@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.nginx-irestore-http.middlewares=redirect-to-https"
+    - "traefik.http.routers.nginx-irestore-http.rule=Host(`api-irestore.mdhtcdn.net`)"
+    - "traefik.http.routers.nginx-irestore.entrypoints=web,websecure"
+    - "traefik.http.routers.nginx-irestore.rule=Host(`api-irestore.mdhtcdn.net`)"
+    - "traefik.http.routers.nginx-irestore.tls=true"
+    - "traefik.http.routers.nginx-irestore.tls.certresolver=leresolver"
+    networks:
+      - web
+  redis:
+    image: "redis:alpine"
+    networks:
+    - web
+networks:
+  web:
+

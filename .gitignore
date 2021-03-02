@@ -1,5 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 env
+venv
 .idea
 *.txt
 envars.py
+__pycache__

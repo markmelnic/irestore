@@ -32,8 +32,15 @@ def init():
         }
 
         res = requests.post(url, headers=headers, data=payload)
+        tokens = json.loads(res.content.decode('utf8'))
+        with open("access_token.txt", "w") as _:
+            _.write(tokens['access_token'])
+        with open("refresh_token.txt", "w") as _:
+            _.write(tokens['refresh_token'])
 
-        return res.text
+        global AMO
+        AMO = client()
+        return {"status": "Nice"}
     else:
         return {"status": "Bad"}
 
@@ -49,8 +56,8 @@ def order():
     'Cookie': '_secure_admin_session_id=88639c77e66d62c035e544f4e532161d; _secure_admin_session_id_csrf=88639c77e66d62c035e544f4e532161d; _y=42b3b466-00aa-40cf-990d-e1ba0fe69b9b; _shopify_y=42b3b466-00aa-40cf-990d-e1ba0fe69b9b; _shopify_fs=2021-02-10T16%3A42%3A07Z; _s=0415647a-7a8c-46e3-9f42-972740946a3f; _shopify_s=0415647a-7a8c-46e3-9f42-972740946a3f'
     }
 
-    response = requests.get(url, headers=headers)
-    data = json.loads(response.content.decode('utf8'))
+    res = requests.get(url, headers=headers)
+    data = json.loads(res.content.decode('utf8'))
 
     order = json.loads(open("results.json", "r").read())
     products = order['line_items']
@@ -67,25 +74,29 @@ def order():
         'custom_fields_values': [
             {
                 "field_id": 100,
-                "values": [{"value": name}]
+                "values": [{"name": name}]
             },
             {
                 "field_id": 101,
-                "values": [{"value": phone}]
+                "values": [{"phone": phone}]
             },
             {
                 "field_id": 102,
-                "values": [{"value": email}]
+                "values": [{"email": email}]
             },
             {
                 "field_id": 103,
-                "values": [{"value": address}]
+                "values": [{"address": address}]
             },
             {
                 "field_id": 104,
-                "values": [{"value":p} for p in products]
+                "values": [{"title": p['title'], "sku": p['sku']} for p in products]
             },
         ],
     }])
 
     return data
+
+@app.route('/api/inventory')
+def inventory():
+    pass

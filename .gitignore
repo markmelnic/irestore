@@ -3,5 +3,6 @@ env
 venv
 .idea
 *.txt
+*.json
 envars.py
 __pycache__

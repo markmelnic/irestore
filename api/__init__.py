@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from api import envars
+from .shopify_api import Shopify
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = getenv('SECRET_KEY')
@@ -18,5 +19,12 @@ from .init_amo import client
 
 AMO = client()
 PIPELINE = 3944278
+
+SPF = Shopify(
+        getenv('SPF_USER'),
+        getenv('SPF_PASS'),
+        getenv('SPF_SITE'),
+        getenv('SPF_HEAD')
+    )
 
 from api import routes

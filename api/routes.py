@@ -60,16 +60,17 @@ def order():
     'Cookie': '_secure_admin_session_id=88639c77e66d62c035e544f4e532161d; _secure_admin_session_id_csrf=88639c77e66d62c035e544f4e532161d; _y=42b3b466-00aa-40cf-990d-e1ba0fe69b9b; _shopify_y=42b3b466-00aa-40cf-990d-e1ba0fe69b9b; _shopify_fs=2021-02-10T16%3A42%3A07Z; _s=0415647a-7a8c-46e3-9f42-972740946a3f; _shopify_s=0415647a-7a8c-46e3-9f42-972740946a3f'
     }
 
-    #res = requests.get(url, headers=headers)
-    #order = json.loads(res.content.decode('utf8'))
+    res = requests.get(url, headers=headers)
+    res = json.loads(res.content.decode('utf8'))
+
     # test file
-    order = json.loads(open("results.json", "r").read())
-    products = order['line_items']
-    price = int(float(order['total_price']))
-    phone = str(order['phone'])
-    email = str(order['contact_email'])
-    name = str(order['name'])
-    address = str(order['billing_address'])
+    res = json.loads(open("results.json", "r").read())
+    products = res['line_items']
+    price = int(float(res['total_price']))
+    phone = str(res['phone'])
+    email = str(res['contact_email'])
+    name = str(res['name'])
+    address = str(res['billing_address'])
 
     objects = [{
         'name': name,
@@ -88,7 +89,7 @@ def order():
             },
         ],
     }]
-    print(objects)
+    #print(objects)
 
     AMO.create_leads_custom_fields()
     AMO.create_leads(objects)
@@ -97,4 +98,10 @@ def order():
 
 @app.route('/api/inventory')
 def inventory():
-    pass
+    products = SPF.get_products()['products']
+
+    for prod in products:
+        for inv in prod['variants']:
+            id = inv['inventory_item_id']
+
+    return SPF.get_inventory_levels_product(id)

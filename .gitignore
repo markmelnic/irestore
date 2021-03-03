@@ -2,6 +2,7 @@
 env
 venv
 .idea
+*.db
 *.txt
 *.json
 envars.py

@@ -1,15 +1,17 @@
 from os import getenv
 from amocrm_api import AmoOAuthClient
 
+from .models import Tokens
+
 def client():
     client = AmoOAuthClient(
-        open("access_token.txt", "r").read(),
-        open("refresh_token.txt", "r").read(),
-        getenv('F_SUBDOMAIN'),
+        Tokens.access_token,
+        Tokens.refresh_token,
+        getenv('SUBDOMAIN'),
         getenv('CLIENT_ID'),
         getenv('CLIENT_SECRET'),
         getenv('REDIRECT')
-        )
+    )
 
     try:
         client.update_tokens()

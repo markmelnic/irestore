@@ -1,7 +1,9 @@
-from api import *
 from os import getenv
 import requests, json
 from flask import request, redirect, url_for
+
+from api import *
+from .models import Tokens
 
 @app.route('/api/pos')
 def pos():
@@ -37,12 +39,11 @@ def init(params):
 
         res = requests.post(url, headers=headers, data=payload)
         tokens = json.loads(res.content.decode('utf8'))
-        with open("access_token.txt", "w") as _:
-            _.write(tokens['access_token'])
-        with open("refresh_token.txt", "w") as _:
-            _.write(tokens['refresh_token'])
+        Tokens.access_token = tokens['access_token']
+        Tokens.refresh_token = tokens['refresh_token']
         global AMO
         AMO = client()
+
         return redirect(url_for('pos'))
     else:
         return redirect(url_for('neg'))

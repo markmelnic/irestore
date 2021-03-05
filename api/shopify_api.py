@@ -17,9 +17,8 @@ class Shopify:
     def get_inventory_item(self, item_id: int) -> dict:
         return self._make_api_request('inventory_items/' + str(item_id))
 
-    def get_inventory_levels(self) -> dict:
+    def get_inventory_levels(self, item_id: str = None) -> dict:
+        if item_id:
+            query = '?' + urlencode({'inventory_item_ids': item_id})
+            return self._make_api_request('inventory_levels', query=query)
         return self._make_api_request('inventory_levels')
-
-    def get_inventory_levels_product(self, item_id: str) -> dict:
-        query = '?' + urlencode({'inventory_item_ids': item_id})
-        return self._make_api_request('inventory_levels', query=query)

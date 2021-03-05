@@ -104,4 +104,4 @@ def inventory():
         for inv in prod['variants']:
             id = inv['inventory_item_id']
 
-    return SPF.get_inventory_levels_product(id)
+    return SPF.get_inventory_levels(item_id=id)

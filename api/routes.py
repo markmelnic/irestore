@@ -6,30 +6,16 @@ from api import *
 from .models import Tokens
 
 @app.route('/api/pos')
-def pos():
-    return {"status": "Nice"}
+def pos(): return {"status": "Nice"}
 
 @app.route('/api/neg')
-def neg():
-    return {"status": "Bad"}
+def neg(): return {"status": "Bad"}
 
 @app.route('/api/init')
-@app.route('/api/init<params>')
-def init(params):
-    print(params)
+def init():
     code = request.args.get('code')
-
     if code:
         url = "https://irestoremoldova.amocrm.ru/oauth2/access_token"
-
-        #payload = json.loads("""{
-        #    'client_id': %s,
-        #    'client_secret': %s,
-        #    'grant_type':'authorization_code',
-        #    'code': %s,
-        #    'redirect_uri': %s
-        #}""" % (getenv('CLIENT_ID'), getenv('CLIENT_SECRET'), getenv('NEW_CODE'), getenv('REDIRECT')))
-        #print(payload)
         payload="{\"client_id\":\"84160251-089e-4ffc-8545-048f8f2d7a1f\",\n\"client_secret\":\"fAGSAc3CJdaLKCOhGEhn6oHUdhhXHvdKF5nCGOSJd3yICCIgcuFlpnDpWNnE8eGU\",\n\"grant_type\":\"authorization_code\",\n\"code\":\""+code+"\",\n\"redirect_uri\":\"https://api-irestore.mdhtcdn.net/api/init\"\n}"
 
         headers = {
@@ -54,54 +40,55 @@ def api_redirect():
 
 @app.route('/api/order')
 def order():
-    url = "https://a59b86043473feded6627533f30ec1fe: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@irestoremd.myshopify.com/admin/api/2021-01/orders.json"
+    data = request.get_data()
+    if data:
+        pass
+    else:
+        # test file
+        res = json.loads(open("results.json", "r").read())
+        products = res['line_items']
+        price = int(float(res['total_price']))
+        phone = str(res['phone'])
+        email = str(res['contact_email'])
+        name = str(res['name'])
+        address = str(res['billing_address'])
 
-    headers = {
-    'Cookie': '_secure_admin_session_id=88639c77e66d62c035e544f4e532161d; _secure_admin_session_id_csrf=88639c77e66d62c035e544f4e532161d; _y=42b3b466-00aa-40cf-990d-e1ba0fe69b9b; _shopify_y=42b3b466-00aa-40cf-990d-e1ba0fe69b9b; _shopify_fs=2021-02-10T16%3A42%3A07Z; _s=0415647a-7a8c-46e3-9f42-972740946a3f; _shopify_s=0415647a-7a8c-46e3-9f42-972740946a3f'
-    }
+        objects = [{
+            'name': name,
+            'price': price,
+            'pipeline_id': PIPELINE,
+            'custom_fields_values': [
+                    {
+                    "field_id": 0,
+                    "values": [{
+                        "text": name,
+                        "phone": phone,
+                        "email": email,
+                        "address": address,
+                        "products": [{"title": str(p['title']), "sku": str(p['sku'])} for p in products]
+                    }],
+                },
+            ],
+        }]
+        #print(objects)
 
-    res = requests.get(url, headers=headers)
-    res = json.loads(res.content.decode('utf8'))
-
-    # test file
-    res = json.loads(open("results.json", "r").read())
-    products = res['line_items']
-    price = int(float(res['total_price']))
-    phone = str(res['phone'])
-    email = str(res['contact_email'])
-    name = str(res['name'])
-    address = str(res['billing_address'])
-
-    objects = [{
-        'name': name,
-        'price': price,
-        'pipeline_id': PIPELINE,
-        'custom_fields_values': [
-                {
-                "field_id": 0,
-                "values": [{
-                    "text": name,
-                    "phone": phone,
-                    "email": email,
-                    "address": address,
-                    "products": [{"title": str(p['title']), "sku": str(p['sku'])} for p in products]
-                }],
-            },
-        ],
-    }]
-    #print(objects)
-
-    AMO.create_leads_custom_fields()
-    AMO.create_leads(objects)
+        AMO.create_leads_custom_fields()
+        AMO.create_leads(objects)
 
     return redirect(url_for('pos'))
 
 @app.route('/api/inventory')
 def inventory():
-    products = SPF.get_products()['products']
+    data = request.get_data()
+    if data:
+        pass
+    else:
 
-    for prod in products:
-        for inv in prod['variants']:
-            id = inv['inventory_item_id']
+        products = SPF.get_products()['products']
 
-    return SPF.get_inventory_levels(item_id=id)
+        for prod in products:
+            for inv in prod['variants']:
+                id = inv['inventory_item_id']
+
+        return SPF.get_inventory_levels(item_id=id)
+    return redirect(url_for('pos'))

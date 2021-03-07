@@ -82,7 +82,10 @@ def inventory():
         data = json.loads(open("inventory.json", "r").read())
 
     id = data['inventory_item_id']
-    TELEGRAM.send_message("There are %s items left" % (data['available']), TELEGRAM_USER)
+
+    left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
+    if int(left) in [5, 10]:
+        TELEGRAM.send_message("There are %s items left" % (left), TELEGRAM_USER)
 
     return SPF.get_inventory_levels(item_id=id)
     return redirect(url_for('pos'))

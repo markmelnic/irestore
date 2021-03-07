@@ -23,8 +23,8 @@ def init():
             'Cookie': 'user_lang=ru'
         }
 
-        res = requests.post(url, headers=headers, data=payload)
-        tokens = json.loads(res.content.decode('utf8'))
+        data = requests.post(url, headers=headers, data=payload)
+        tokens = json.loads(data.content.decode('utf8'))
         Tokens.access_token = tokens['access_token']
         Tokens.refresh_token = tokens['refresh_token']
         global AMO
@@ -41,54 +41,47 @@ def api_redirect():
 @app.route('/api/order')
 def order():
     data = request.get_data()
-    if data:
-        pass
-    else:
-        # test file
-        res = json.loads(open("results.json", "r").read())
-        products = res['line_items']
-        price = int(float(res['total_price']))
-        phone = str(res['phone'])
-        email = str(res['contact_email'])
-        name = str(res['name'])
-        address = str(res['billing_address'])
+    if not data:
+        data = json.loads(open("results.json", "r").read())
 
-        objects = [{
-            'name': name,
-            'price': price,
-            'pipeline_id': PIPELINE,
-            'custom_fields_values': [
-                    {
-                    "field_id": 0,
-                    "values": [{
-                        "text": name,
-                        "phone": phone,
-                        "email": email,
-                        "address": address,
-                        "products": [{"title": str(p['title']), "sku": str(p['sku'])} for p in products]
-                    }],
-                },
-            ],
-        }]
-        #print(objects)
+    products = data['line_items']
+    price = int(float(data['total_price']))
+    phone = str(data['phone'])
+    email = str(data['contact_email'])
+    name = str(data['name'])
+    address = str(data['billing_address'])
 
-        AMO.create_leads_custom_fields()
-        AMO.create_leads(objects)
+    objects = [{
+        'name': name,
+        'price': price,
+        'pipeline_id': PIPELINE,
+        'custom_fields_values': [
+                {
+                "field_id": 0,
+                "values": [{
+                    "text": name,
+                    "phone": phone,
+                    "email": email,
+                    "address": address,
+                    "products": [{"title": str(p['title']), "sku": str(p['sku'])} for p in products]
+                }],
+            },
+        ],
+    }]
+    #print(objects)
+
+    AMO.create_leads_custom_fields()
+    AMO.create_leads(objects)
 
     return redirect(url_for('pos'))
 
 @app.route('/api/inventory')
 def inventory():
     data = request.get_data()
-    if data:
-        pass
-    else:
+    if not data:
+        data = json.loads(open("inventory.json", "r").read())
 
-        products = SPF.get_products()['products']
+    id = data['inventory_item_id']
 
-        for prod in products:
-            for inv in prod['variants']:
-                id = inv['inventory_item_id']
-
-        return SPF.get_inventory_levels(item_id=id)
+    return SPF.get_inventory_levels(item_id=id)
     return redirect(url_for('pos'))

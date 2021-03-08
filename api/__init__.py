@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from api import envars
+from .models import *
 from .shopify_api import Shopify
 
 app = Flask(__name__)
@@ -15,6 +16,9 @@ db = SQLAlchemy(app)
 
 db.create_all()
 db.session.commit()
+
+if not Tokens.query.first():
+    db.session.add(Tokens())
 
 from .init_amo import client
 

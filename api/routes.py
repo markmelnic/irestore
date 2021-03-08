@@ -25,8 +25,11 @@ def init():
 
         data = requests.post(url, headers=headers, data=payload)
         tokens = json.loads(data.content.decode('utf8'))
-        Tokens.access_token = tokens['access_token']
-        Tokens.refresh_token = tokens['refresh_token']
+        db_tokens = Tokens.query.first()
+        db_tokens.access_token = tokens['access_token']
+        db_tokens.refresh_token = tokens['refresh_token']
+        db.session.commit()
+
         global AMO
         AMO = client()
 

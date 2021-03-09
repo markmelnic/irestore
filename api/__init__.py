@@ -4,7 +4,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from api import envars
-from .models import *
 from .shopify_api import Shopify
 
 app = Flask(__name__)
@@ -13,6 +12,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = getenv('SQLALCHEMY_DATABASE_URI')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
+from .models import *
 
 db.create_all()
 db.session.commit()

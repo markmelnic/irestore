@@ -1,8 +1,0 @@
-Flask_SQLAlchemy==2.4.4
-Flask==1.1.2
-gunicorn==20.0.4
-pretty_errors==1.2.19
-requests==2.24.0
-psycopg2==2.8.6
-amocrm_api_wrapper==0.0.9
-amocrm_api==2.3.1

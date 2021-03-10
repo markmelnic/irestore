@@ -1,9 +1,9 @@
-FROM python:3.7-alpine
+FROM python:3.7
 WORKDIR /var/www/irestore
 ENV FLASK_APP=wsgi.py
 ENV FLASK_RUN_HOST=0.0.0.0
 RUN apk update && apk add bash
-RUN apk add --no-cache gcc musl-dev linux-headers libpq-dev
+RUN apk add --no-cache gcc musl-dev linux-headers postgresql-dev
 COPY requirements.txt requirements.txt
 RUN pip install pg_config
 RUN pip install psycopg2

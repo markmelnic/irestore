@@ -5,3 +5,9 @@ class Tokens(db.Model):
 
     access_token = db.Column(db.String, default="")
     refresh_token = db.Column(db.String, default="")
+
+class TelegramUsers(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer)
+    status = db.Column(db.Boolean, default=True)

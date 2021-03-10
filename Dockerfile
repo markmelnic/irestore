@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.7-alpine
 WORKDIR /var/www/irestore
 ENV FLASK_APP=wsgi.py
 ENV FLASK_RUN_HOST=0.0.0.0

@@ -34,6 +34,5 @@ SPF = Shopify(
     )
 
 TELEGRAM = TelegramBot(getenv('TELEGRAM_TOKEN'))
-TELEGRAM_USER = getenv('TELEGRAM_USER')
 
 from api import routes

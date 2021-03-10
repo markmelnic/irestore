@@ -88,7 +88,38 @@ def inventory():
 
     left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
     if int(left) in [5, 10]:
-        TELEGRAM.send_message("There are %s items left" % (left), TELEGRAM_USER)
+        print(TelegramUsers.query.filter_by(status=True).all())
+        for user in TelegramUsers.query.filter_by(status=True).all():
+            TELEGRAM.send_message("There are %s items left" % (left), user.user_id)
 
     return SPF.get_inventory_levels(item_id=id)
+    return redirect(url_for('pos'))
+
+@app.route('/api/telegram/add/<user_id>')
+def telegram_add(user_id):
+    dish = TelegramUsers(
+        user_id = user_id
+    )
+    db.session.add(dish)
+    db.session.commit()
+
+    return redirect(url_for('pos'))
+
+@app.route('/api/telegram/del/<user_id>')
+def telegram_del(user_id):
+    user = TelegramUsers.query.filter_by(user_id=user_id).first()
+    db.session.delete(user)
+    db.session.commit()
+
+    return redirect(url_for('pos'))
+
+@app.route('/api/telegram/toggle/<user_id>')
+def telegram_toggle(user_id):
+    user = TelegramUsers.query.filter_by(user_id=user_id).first()
+    if user.status:
+        user.status = False
+    else:
+        user.status = True
+    db.session.commit()
+
     return redirect(url_for('pos'))

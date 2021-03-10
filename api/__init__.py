@@ -1,7 +1,9 @@
+from sqlalchemy.orm import exc
 from api.telegram_api import TelegramBot
 from os import getenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
 
 from api import envars
 from .shopify_api import Shopify
@@ -15,8 +17,13 @@ db = SQLAlchemy(app)
 
 from .models import *
 
-db.create_all()
-db.session.commit()
+try:
+    db.create_all()
+    db.session.commit()
+except OperationalError:
+    pass
+except:
+    pass
 
 if not Tokens.query.first():
     db.session.add(Tokens())

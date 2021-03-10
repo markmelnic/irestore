@@ -44,8 +44,11 @@ def api_redirect():
 @app.route('/api/order')
 def order():
     data = request.get_data()
-    if not data:
-        data = json.loads(open("results.json", "r").read())
+    try:
+        if not data:
+            data = json.loads(open("results.json", "r").read())
+    except FileNotFoundError:
+        pass
 
     products = data['line_items']
     price = int(float(data['total_price']))
@@ -81,8 +84,11 @@ def order():
 @app.route('/api/inventory')
 def inventory():
     data = request.get_data()
-    if not data:
-        data = json.loads(open("inventory.json", "r").read())
+    try:
+        if not data:
+            data = json.loads(open("inventory.json", "r").read())
+    except FileNotFoundError:
+        pass
 
     id = data['inventory_item_id']
 

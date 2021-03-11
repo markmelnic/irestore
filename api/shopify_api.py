@@ -11,6 +11,9 @@ class Shopify:
         res = requests.get(_url, headers=self.headers)
         return json.loads(res.content.decode('utf8'))
 
+    def get_product(self, prod_id) -> dict:
+        return self._make_api_request(f'products/{prod_id}')
+
     def get_products(self) -> dict:
         return self._make_api_request('products')
 

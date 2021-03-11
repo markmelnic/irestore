@@ -20,6 +20,7 @@ db.session.commit()
 
 if not Tokens.query.first():
     db.session.add(Tokens())
+    db.session.commit()
 
 from .init_amo import client
 

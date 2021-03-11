@@ -16,14 +16,21 @@ def init():
     code = request.args.get('code')
     if code:
         url = "https://irestoremoldova.amocrm.ru/oauth2/access_token"
-        payload="{\"client_id\":\"84160251-089e-4ffc-8545-048f8f2d7a1f\",\n\"client_secret\":\"fAGSAc3CJdaLKCOhGEhn6oHUdhhXHvdKF5nCGOSJd3yICCIgcuFlpnDpWNnE8eGU\",\n\"grant_type\":\"authorization_code\",\n\"code\":\""+code+"\",\n\"redirect_uri\":\"https://api-irestore.mdhtcdn.net/api/init\"\n}"
 
         headers = {
             'Content-Type': 'application/json',
             'Cookie': 'user_lang=ru'
         }
 
-        data = requests.post(url, headers=headers, data=payload)
+        payload = {
+            "client_id": getenv('CLIENT_ID'),
+            "client_secret": getenv('CLIENT_SECRET'),
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": "https://api-irestore.mdhtcdn.net/api/init" # url_for("api/init")
+            }
+
+        data = requests.post(url, headers=headers, data=json.dumps(payload))
         tokens = json.loads(data.content.decode('utf8'))
         db_tokens = Tokens.query.first()
         db_tokens.access_token = tokens['access_token']

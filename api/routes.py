@@ -8,8 +8,14 @@ from .models import Tokens
 @app.route('/api/pos')
 def pos(): return {"status": "Nice"}
 
+@app.errorhandler(500)
+@app.errorhandler(501)
+@app.errorhandler(502)
+@app.errorhandler(503)
 @app.route('/api/neg')
-def neg(): return {"status": "Bad"}
+def neg(e):
+    message = str(e)[4:].split(":")
+    return {"code": e.code, "reason": message[0], "message": message[1][1:]}
 
 @app.route('/api/init')
 def init():
@@ -20,7 +26,7 @@ def init():
         headers = {
             'Content-Type': 'application/json',
             'Cookie': 'user_lang=ru'
-        }
+            }
 
         payload = {
             "client_id": getenv('CLIENT_ID'),
@@ -41,8 +47,6 @@ def init():
         AMO = client()
 
         return redirect(url_for('pos'))
-    else:
-        return redirect(url_for('neg'))
 
 @app.route('/api/redirect')
 def api_redirect():
@@ -83,8 +87,8 @@ def order():
     }]
     #print(objects)
 
-    AMO.create_leads_custom_fields()
-    AMO.create_leads(objects)
+    #AMO.create_leads_custom_fields()
+    #AMO.create_leads(objects)
 
     return redirect(url_for('pos'))
 
@@ -96,8 +100,27 @@ def inventory():
             data = json.loads(open("inventory.json", "r").read())
     except FileNotFoundError:
         pass
-
     id = data['inventory_item_id']
+
+    products = SPF.get_products()['products']
+    target = None
+    for p in products:
+        for v in p['variants']:
+            if id == v['inventory_item_id']:
+                target = v['product_id']
+                price = v['price']
+                sku = v['sku']
+                break
+        if target:
+            break
+    #product = SPF.get_product(prod_id=target)['product']
+
+    objects = [{
+        'name': f"{target} | " + sku,
+        'price': float(price),
+        'pipeline_id': PIPELINE,
+    }]
+    AMO.create_leads(objects)
 
     left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
     if int(left) in [5, 10]:
@@ -105,7 +128,6 @@ def inventory():
         for user in TelegramUsers.query.filter_by(status=True).all():
             TELEGRAM.send_message("There are %s items left" % (left), user.user_id)
 
-    return SPF.get_inventory_levels(item_id=id)
     return redirect(url_for('pos'))
 
 @app.route('/api/telegram/add/<user_id>')

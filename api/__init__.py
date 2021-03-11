@@ -17,13 +17,8 @@ db = SQLAlchemy(app)
 
 from .models import *
 
-try:
-    db.create_all()
-    db.session.commit()
-except OperationalError:
-    pass
-except:
-    pass
+db.create_all()
+db.session.commit()
 
 if not Tokens.query.first():
     db.session.add(Tokens())

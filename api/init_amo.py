@@ -4,9 +4,10 @@ from amocrm_api import AmoOAuthClient
 from .models import Tokens
 
 def client():
+    tokens = Tokens.query.first()
     client = AmoOAuthClient(
-        Tokens.access_token,
-        Tokens.refresh_token,
+        tokens.access_token,
+        tokens.refresh_token,
         getenv('SUBDOMAIN'),
         getenv('CLIENT_ID'),
         getenv('CLIENT_SECRET'),

@@ -115,12 +115,12 @@ def inventory():
             break
     #product = SPF.get_product(prod_id=target)['product']
 
-    objects = [{
+    object = [{
         'name': f"{target} | " + sku,
-        'price': float(price),
+        'price': int(float(price)),
         'pipeline_id': PIPELINE,
     }]
-    AMO.create_leads(objects)
+    AMO.create_leads(object)
 
     left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
     if int(left) in [5, 10]:

@@ -53,7 +53,7 @@ def init():
     else:
         return redirect(url_for('neg'))
 
-@app.route('/api/redirect')
+@app.route('/api/redirect', methods=['GET'])
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
@@ -68,7 +68,7 @@ def add_custom_fields():
 
     return redirect(url_for('pos'))
 
-@app.route('/api/order')
+@app.route('/api/order', methods=['POST', 'GET'])
 def order():
     if request.method == "POST":
         data = request.get_data()
@@ -109,7 +109,7 @@ def order():
 
     return redirect(url_for('pos'))
 
-@app.route('/api/inventory')
+@app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():
     if request.method == "POST":
         data = request.get_data()
@@ -149,7 +149,7 @@ def inventory():
 
     return redirect(url_for('pos'))
 
-@app.route('/api/telegram/add/<user_id>')
+@app.route('/api/telegram/add/<user_id>', methods=['GET'])
 def telegram_add(user_id):
     dish = TelegramUsers(
         user_id = user_id
@@ -159,7 +159,7 @@ def telegram_add(user_id):
 
     return redirect(url_for('pos'))
 
-@app.route('/api/telegram/del/<user_id>')
+@app.route('/api/telegram/del/<user_id>', methods=['GET'])
 def telegram_del(user_id):
     user = TelegramUsers.query.filter_by(user_id=user_id).first()
     db.session.delete(user)
@@ -167,7 +167,7 @@ def telegram_del(user_id):
 
     return redirect(url_for('pos'))
 
-@app.route('/api/telegram/toggle/<user_id>')
+@app.route('/api/telegram/toggle/<user_id>', methods=['GET'])
 def telegram_toggle(user_id):
     user = TelegramUsers.query.filter_by(user_id=user_id).first()
     if user.status:

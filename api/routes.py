@@ -71,7 +71,7 @@ def add_custom_fields():
 @app.route('/api/order', methods=['POST', 'GET'])
 def order():
     if request.method == "POST":
-        data = json.load(request.get_data())
+        data = json.loads(request.get_data())
     else:
         try:
             data = json.loads(open("results.json", "r").read())
@@ -89,24 +89,18 @@ def order():
         'name': name,
         'price': price,
         'pipeline_id': PIPELINE,
-        'custom_fields_values': [
-                {
-                "field_id": 0,
-                "values": [{
-                    "text": name,
-                    "phone": phone,
-                    "email": email,
-                    "address": address,
-                    "products": [{"title": str(p['title']), "sku": str(p['sku'])} for p in products]
-                }],
-            },
-        ],
     }]
-    print(objects)
 
-#    AMO.create_leads_custom_fields()
-    #AMO.create_leads(objects)
+    AMO.create_leads(objects)
 
+    return redirect(url_for('pos'))
+
+@app.route('/api/order/delete', methods=['POST', 'GET'])
+def order_delete():
+    if request.method == "POST":
+        data = json.loads(request.get_data())
+    for user in TelegramUsers.query.filter_by(status=True).all():
+        TELEGRAM.send_message("Order %s has been DELETED" % (data['id']), user.user_id)
     return redirect(url_for('pos'))
 
 @app.route('/api/inventory', methods=['POST', 'GET'])
@@ -133,7 +127,7 @@ def inventory():
         if target:
             break
 
-    title = f"{target} | {sku}"
+    title = f"Product id: {target} | SKU: {sku}"
     object = [{
         'name': title,
         'price': int(float(price)),
@@ -143,9 +137,8 @@ def inventory():
 
     left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
     if int(left) in [5, 10]:
-        print(TelegramUsers.query.filter_by(status=True).all())
         for user in TelegramUsers.query.filter_by(status=True).all():
-            TELEGRAM.send_message("There are %s %s left" % (left, title), user.user_id)
+            TELEGRAM.send_message("There are %s - %s - items left" % (left, title), user.user_id)
 
     return redirect(url_for('pos'))
 

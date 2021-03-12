@@ -5,8 +5,7 @@ from flask import request, redirect, url_for
 from api import *
 from .models import Tokens
 
-@app.route('/api/pos')
-def pos(): return {"status": "Nice"}
+def pos(): return {"status": "Nice"}, 200
 
 @app.errorhandler(500)
 @app.errorhandler(501)
@@ -49,7 +48,7 @@ def init():
         global AMO
         AMO = client()
 
-        return redirect(url_for('pos'))
+        return pos()
     else:
         return redirect(url_for('neg'))
 
@@ -66,7 +65,7 @@ def add_custom_fields():
     print(fields)
     AMO.create_leads_custom_fields(fs)
 
-    return redirect(url_for('pos'))
+    return pos()
 
 @app.route('/api/order', methods=['POST', 'GET'])
 def order():
@@ -93,7 +92,7 @@ def order():
 
     AMO.create_leads(objects)
 
-    return redirect(url_for('pos'))
+    return pos()
 
 @app.route('/api/order/delete', methods=['POST', 'GET'])
 def order_delete():
@@ -101,7 +100,7 @@ def order_delete():
         data = json.loads(request.get_data())
     for user in TelegramUsers.query.filter_by(status=True).all():
         TELEGRAM.send_message("Order %s has been DELETED" % (data['id']), user.user_id)
-    return redirect(url_for('pos'))
+    return pos()
 
 @app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():
@@ -140,7 +139,7 @@ def inventory():
         for user in TelegramUsers.query.filter_by(status=True).all():
             TELEGRAM.send_message("There are %s - %s - items left" % (left, title), user.user_id)
 
-    return redirect(url_for('pos'))
+    return pos()
 
 @app.route('/api/telegram/add/<user_id>', methods=['GET'])
 def telegram_add(user_id):
@@ -150,7 +149,7 @@ def telegram_add(user_id):
     db.session.add(dish)
     db.session.commit()
 
-    return redirect(url_for('pos'))
+    return pos()
 
 @app.route('/api/telegram/del/<user_id>', methods=['GET'])
 def telegram_del(user_id):
@@ -158,7 +157,7 @@ def telegram_del(user_id):
     db.session.delete(user)
     db.session.commit()
 
-    return redirect(url_for('pos'))
+    return pos()
 
 @app.route('/api/telegram/toggle/<user_id>', methods=['GET'])
 def telegram_toggle(user_id):
@@ -169,4 +168,4 @@ def telegram_toggle(user_id):
         user.status = True
     db.session.commit()
 
-    return redirect(url_for('pos'))
+    return pos()

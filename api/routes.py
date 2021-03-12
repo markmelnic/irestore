@@ -134,8 +134,9 @@ def inventory():
         if target:
             break
 
+    title = f"{target} | {sku}"
     object = [{
-        'name': f"{target} | {sku}",
+        'name': title,
         'price': int(float(price)),
         'pipeline_id': PIPELINE,
     }]
@@ -145,7 +146,7 @@ def inventory():
     if int(left) in [5, 10]:
         print(TelegramUsers.query.filter_by(status=True).all())
         for user in TelegramUsers.query.filter_by(status=True).all():
-            TELEGRAM.send_message("There are %s items left" % (left), user.user_id)
+            TELEGRAM.send_message("There are %s %s left" % (left, title), user.user_id)
 
     return redirect(url_for('pos'))
 

@@ -147,6 +147,14 @@ def inventory():
 def respond():
     data = json.loads(request.get_data())
     print(data)
+    return 'ok'
+    # {'update_id': 500481835, 'message': {'message_id': 41,
+    #                                      'from': {'id': 228213052, 'is_bot': False, 'first_name': 'Victor',
+    #                                               'last_name': 'Cron', 'username': 'vkanet', 'language_code': 'en'},
+    #                                      'chat': {'id': 228213052, 'first_name': 'Victor', 'last_name': 'Cron',
+    #                                               'username': 'vkanet', 'type': 'private'}, 'date': 1615581421,
+    #                                      'text': '/start',
+    #                                      'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}
 
    # # retrieve the message in JSON and then transform it to Telegram object
    # update = telegram.Update.de_json(request.get_json(force=True), bot)

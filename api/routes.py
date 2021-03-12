@@ -97,9 +97,11 @@ def order():
 
 @app.route('/api/order/delete', methods=['POST', 'GET'])
 def order_delete():
-    data = json.loads(request.get_data())
-    print(data)
-    return data
+    if request.method == "POST":
+        data = json.loads(request.get_data())
+    for user in TelegramUsers.query.filter_by(status=True).all():
+        TELEGRAM.send_message("Order %s has been DELETED" % (data['id']), user.user_id)
+    return redirect(url_for('pos'))
 
 @app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():

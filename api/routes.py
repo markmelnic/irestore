@@ -13,9 +13,12 @@ def pos(): return {"status": "Nice"}
 @app.errorhandler(502)
 @app.errorhandler(503)
 @app.route('/api/neg')
-def neg(e):
-    message = str(e)[4:].split(":")
-    return {"code": e.code, "reason": message[0], "message": message[1][1:]}
+def neg(e = False):
+    if e:
+        message = str(e)[4:].split(":")
+        return {"code": e.code, "reason": message[0], "message": message[1][1:]}
+    else:
+        return {"status": "Bad"}
 
 @app.route('/api/init')
 def init():
@@ -47,6 +50,8 @@ def init():
         AMO = client()
 
         return redirect(url_for('pos'))
+    else:
+        return redirect(url_for('neg'))
 
 @app.route('/api/redirect')
 def api_redirect():
@@ -85,16 +90,17 @@ def order():
             },
         ],
     }]
-    #print(objects)
+    print(objects)
 
-    #AMO.create_leads_custom_fields()
-    #AMO.create_leads(objects)
+#    AMO.create_leads_custom_fields()
+    AMO.create_leads(objects)
 
     return redirect(url_for('pos'))
 
 @app.route('/api/inventory')
 def inventory():
     data = request.get_data()
+    print(data)
     try:
         if not data:
             data = json.loads(open("inventory.json", "r").read())
@@ -107,13 +113,13 @@ def inventory():
     for p in products:
         for v in p['variants']:
             if id == v['inventory_item_id']:
+                product = p
                 target = v['product_id']
                 price = v['price']
                 sku = v['sku']
                 break
         if target:
             break
-    #product = SPF.get_product(prod_id=target)['product']
 
     object = [{
         'name': f"{target} | " + sku,

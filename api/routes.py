@@ -71,7 +71,7 @@ def add_custom_fields():
 @app.route('/api/order', methods=['POST', 'GET'])
 def order():
     if request.method == "POST":
-        data = request.get_data()
+        data = json.load(request.get_data())
     else:
         try:
             data = json.loads(open("results.json", "r").read())
@@ -112,13 +112,12 @@ def order():
 @app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():
     if request.method == "POST":
-        data = request.get_data()
+        data = json.load(request.get_data())
     else:
         try:
             data = json.loads(open("inventory.json", "r").read())
         except FileNotFoundError:
             return redirect(url_for('neg'))
-    print(data)
     id = data['inventory_item_id']
 
     products = SPF.get_products()['products']

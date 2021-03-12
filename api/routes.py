@@ -112,7 +112,7 @@ def order():
 @app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():
     if request.method == "POST":
-        data = json.load(request.get_data())
+        data = json.loads(request.get_data())
     else:
         try:
             data = json.loads(open("inventory.json", "r").read())

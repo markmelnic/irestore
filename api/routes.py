@@ -57,14 +57,26 @@ def init():
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
+@app.route('/api/add_custom_fields')
+def add_custom_fields():
+    fs = ["name", "phone", "email", "address", "product", "sku"]
+    fields = []
+    for f in fs:
+        fields.append({"type": "text", "name": f})
+    print(fields)
+    AMO.create_leads_custom_fields(fs)
+
+    return redirect(url_for('pos'))
+
 @app.route('/api/order')
 def order():
-    data = request.get_data()
-    try:
-        if not data:
+    if request.method == "POST":
+        data = request.get_data()
+    else:
+        try:
             data = json.loads(open("results.json", "r").read())
-    except FileNotFoundError:
-        pass
+        except FileNotFoundError:
+            return redirect(url_for('neg'))
 
     products = data['line_items']
     price = int(float(data['total_price']))
@@ -93,19 +105,20 @@ def order():
     print(objects)
 
 #    AMO.create_leads_custom_fields()
-    AMO.create_leads(objects)
+    #AMO.create_leads(objects)
 
     return redirect(url_for('pos'))
 
 @app.route('/api/inventory')
 def inventory():
-    data = request.get_data()
-    print(data)
-    try:
-        if not data:
+    if request.method == "POST":
+        data = request.get_data()
+    else:
+        try:
             data = json.loads(open("inventory.json", "r").read())
-    except FileNotFoundError:
-        pass
+        except FileNotFoundError:
+            return redirect(url_for('neg'))
+    print(data)
     id = data['inventory_item_id']
 
     products = SPF.get_products()['products']
@@ -122,7 +135,7 @@ def inventory():
             break
 
     object = [{
-        'name': f"{target} | " + sku,
+        'name': f"{target} | {sku}",
         'price': int(float(price)),
         'pipeline_id': PIPELINE,
     }]

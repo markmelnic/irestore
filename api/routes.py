@@ -154,6 +154,16 @@ def respond():
         db.session.add(dish)
         db.session.commit()
 
+    elif text == "/help":
+        message = """
+        /help - List of commands
+        /start - Initialise app and user
+        /info - Receive current user information
+        /delete - Remove user
+        /toggle - Receive or not notifications
+        """
+        TELEGRAM.send_message(message, user_id)
+
     elif text == "/toggle":
         user = TelegramUsers.query.filter_by(user_id=user_id).first()
         if user.status:

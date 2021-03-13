@@ -141,7 +141,6 @@ def inventory():
 
     return pos()
 
-
 @app.route('/api/telegram/webhook', methods=['POST'])
 def respond():
     data = json.loads(request.get_data())
@@ -153,23 +152,24 @@ def respond():
             )
         db.session.add(dish)
         db.session.commit()
+        TELEGRAM.send_message("Initialisation successful, you will receive notifications", user_id)
 
     elif text == "/help":
-        message = """
+        help_message = """
         /help - List of commands
         /start - Initialise app and user
         /info - Receive current user information
         /delete - Remove user
         /toggle - Receive or not notifications
         """
-        TELEGRAM.send_message(message, user_id)
+        TELEGRAM.send_message(help_message, user_id)
 
     elif text == "/info":
         user = TelegramUsers.query.filter_by(user_id=user_id).first()
         n_status = ""
         if not user.status:
             n_status = "NOT "
-        TELEGRAM.send_message("You are currently %sreceiving notifications." % n_status, user_id)
+        TELEGRAM.send_message("You are currently %sreceiving notifications" % n_status, user_id)
 
     elif text == "/toggle":
         user = TelegramUsers.query.filter_by(user_id=user_id).first()
@@ -179,9 +179,15 @@ def respond():
             user.status = True
         db.session.commit()
 
+        n_status = ""
+        if not user.status:
+            n_status = "NOT "
+        TELEGRAM.send_message("Status changed, you are %sreceiving notifications" % n_status, user_id)
+
     elif text == "/delete":
         user = TelegramUsers.query.filter_by(user_id=user_id).first()
         db.session.delete(user)
         db.session.commit()
+        TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to reingage", user_id)
 
     return pos()

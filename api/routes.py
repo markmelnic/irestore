@@ -164,6 +164,13 @@ def respond():
         """
         TELEGRAM.send_message(message, user_id)
 
+    elif text == "/info":
+        user = TelegramUsers.query.filter_by(user_id=user_id).first()
+        n_status = ""
+        if not user.status:
+            n_status = "NOT "
+        TELEGRAM.send_message("You are currently %sreceiving notifications." % n_status, user_id)
+
     elif text == "/toggle":
         user = TelegramUsers.query.filter_by(user_id=user_id).first()
         if user.status:

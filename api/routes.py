@@ -1,9 +1,16 @@
+import requests, json, hmac, hashlib, base64
 from os import getenv
-import requests, json
 from flask import request, redirect, url_for
 
 from api import *
 from .models import Tokens
+
+SECRET = 'Vadim'
+
+def verify_webhook(data, hmac_header):
+    digest = hmac.new(SECRET, data.encode('utf-8'), hashlib.sha256).digest()
+    computed_hmac = base64.b64encode(digest)
+    return hmac.compare_digest(computed_hmac, hmac_header.encode('utf-8'))
 
 def pos(): return {"status": "Nice"}, 200
 
@@ -67,10 +74,14 @@ def add_custom_fields():
 
     return pos()
 
-@app.route('/api/order', methods=['POST', 'GET'])
+@app.route('/api/order/create', methods=['POST', 'GET'])
 def order():
     if request.method == "POST":
         data = json.loads(request.get_data())
+        verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
+        if not verify:
+            return redirect(url_for('neg'))
+
     else:
         try:
             data = json.loads(open("results.json", "r").read())
@@ -98,6 +109,10 @@ def order():
 def order_delete():
     if request.method == "POST":
         data = json.loads(request.get_data())
+        verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
+        if not verify:
+            return redirect(url_for('neg'))
+
     for user in TelegramUsers.query.filter_by(status=True).all():
         TELEGRAM.send_message("Order %s has been DELETED" % (data['id']), user.user_id)
     return pos()

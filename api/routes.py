@@ -73,7 +73,7 @@ def add_custom_fields():
     return pos()
 
 @app.route('/api/order/create', methods=['POST', 'GET'])
-def order():
+def order_create():
     if request.method == "POST":
         data = json.loads(request.get_data())
         verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
@@ -102,6 +102,14 @@ def order():
     AMO.create_leads(objects)
 
     return pos()
+
+@app.route('/api/order/update', methods=['POST', 'GET'])
+def order_update():
+    if request.method == "POST":
+        data = json.loads(request.get_data())
+        verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
+        if not verify:
+            return redirect(url_for('neg'))
 
 @app.route('/api/order/delete', methods=['POST', 'GET'])
 def order_delete():

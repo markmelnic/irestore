@@ -3551,3 +3551,22 @@ class BaseClient(object):
         self, catalog_id: int, custom_fields: list
     ) -> dict:
         return self._update_custom_fields(f'catalogs/{catalog_id}', custom_fields)
+
+    ### NOTES SECTION
+
+    def _create_note(self, entity: str, objects: list, entity_id: int = None) -> dict:
+        """method for creating or updating notes
+
+        Args:
+            entity (str): name of entities like 'leads'
+            objects (list): list of obejcts
+
+        Returns:
+            dict: query result
+        """
+        url = f'{self.crm_url}/api/v4/{entity}/{entity_id}/notes' if entity_id else f'{self.crm_url}/api/v4/{entity}/notes'
+        http_method = 'post'
+        return self._send_api_request(http_method, url, objects)
+
+    def create_lead_note(self, objects: list) -> dict:
+        return self._create_note('leads', objects)

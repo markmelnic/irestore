@@ -26,8 +26,6 @@ if not Tokens.query.first():
     db.session.add(Tokens())
     db.session.commit()
 
-from .init_amo import client
-
 tokens = Tokens.query.first()
 AMO = AmoOAuthClient(
     tokens.access_token,
@@ -39,7 +37,7 @@ AMO = AmoOAuthClient(
 )
 
 try:
-    client.update_tokens()
+    AMO.update_tokens()
 except:
     pass
 

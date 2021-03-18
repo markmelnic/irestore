@@ -52,7 +52,15 @@ def init():
         db.session.commit()
 
         global AMO
-        AMO = client()
+        tokens = Tokens.query.first()
+        AMO = AmoOAuthClient(
+            tokens.access_token,
+            tokens.refresh_token,
+            getenv('SUBDOMAIN'),
+            getenv('CLIENT_ID'),
+            getenv('CLIENT_SECRET'),
+            getenv('REDIRECT')
+        )
 
         return pos()
     else:
@@ -76,36 +84,6 @@ def api_service():
             number = field['values'][0]['value']
 
     return "373" + number[-8:]
-
-@app.route('/api/sync_products', methods=['POST', 'GET'])
-def sync_products():
-    temp = [[str(v['sku']) +'|'+ str(v['product_id']) for v in p['variants']] for p in SPF.get_products()['products']]
-    products = []
-    c = 0
-    for __ in temp:
-        for _ in __:
-            c += 1
-            products.append({"value": _, "sort": c})
-
-    return AMO.get_lead(30269101)
-
-    custom = [
-        {
-            "name": "TEST BLEA",
-            "type": "multiselect",
-            "enums": products,
-            "is_deletable": False,
-            "is_visible": True,
-            "is_required": True,
-            "required_statuses": [{
-                "pipeline_id": PIPELINE
-            }]
-        }
-    ]
-    #print(custom)
-    #AMO.create_leads_custom_fields(custom)
-
-    return pos()
 
 @app.route('/api/add_custom_fields')
 def add_custom_fields():
@@ -155,8 +133,19 @@ def order_create():
         'price': price,
         'pipeline_id': PIPELINE,
     }]
+    lead = AMO.create_leads(objects)
 
-    AMO.create_leads(objects)
+    for i, p in enumerate(products):
+        objects = [
+            {
+                "entity_id": lead['_embedded']['leads'][0]['id'],
+                "note_type": "common",
+                "params": {
+                    "text": f"Produs {i + 1}\nTitle: {p['title']}\nSku: {p['sku']}",
+                }
+            }
+        ]
+        AMO.create_lead_note(objects)
 
     return pos()
 

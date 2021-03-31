@@ -228,12 +228,15 @@ def respond():
     user_id = int(data['message']['from']['id'])
     text = data['message']['text']
     if text == "/start":
-        dish = TelegramUsers(
-            user_id = user_id
-            )
-        db.session.add(dish)
-        db.session.commit()
-        TELEGRAM.send_message("Initialisation successful, you will receive notifications", user_id)
+        if not TelegramUsers.query.filter_by(user_id=user_id).first():
+            user = TelegramUsers(
+                user_id = user_id
+                )
+            db.session.add(user)
+            db.session.commit()
+            TELEGRAM.send_message("Initialisation successful, you will receive notifications", user_id)
+        else:
+            TELEGRAM.send_message("You have already been initialised, you will receive notifications", user_id)
 
     elif text == "/help":
         help_message = """

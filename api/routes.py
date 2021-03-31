@@ -127,6 +127,7 @@ def order_create():
     email = str(data['contact_email'])
     name = str(data['name'])
     address = str(data['billing_address'])
+    order_url = str(data['order_status_url'])
 
     objects = [{
         'name': name,
@@ -146,6 +147,8 @@ def order_create():
             }
         ]
         AMO.create_lead_note(objects)
+
+    TELEGRAM.send_message("O comanda noua a fost plasata\n%s" % (order_url))
 
     return pos()
 
@@ -256,5 +259,12 @@ def respond():
         db.session.delete(user)
         db.session.commit()
         TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to reingage", user_id)
+
+    return pos()
+
+@app.route('/test_sms', methods=['GET', 'POST'])
+def test_sms():
+    nr = "078424479"
+    SMS.send_sms(nr, "Acesta este un test.")
 
     return pos()

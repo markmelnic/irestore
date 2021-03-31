@@ -11,3 +11,4 @@ class TelegramUsers(db.Model):
 
     user_id = db.Column(db.Integer)
     status = db.Column(db.Boolean, default=True)
+    dev = db.Column(db.Boolean, default=False)

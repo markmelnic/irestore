@@ -4,6 +4,7 @@ from os import getenv
 from flask import request, redirect, url_for
 
 from api import *
+from .adj import *
 from .models import Tokens
 
 def verify_webhook(data, hmac_header):
@@ -17,6 +18,7 @@ def pos(): return {"status": "Nice"}, 200
 @app.errorhandler(501)
 @app.errorhandler(502)
 @app.errorhandler(503)
+@amo_exception
 @app.route('/api/neg')
 def neg(e = False):
     if e:
@@ -25,6 +27,7 @@ def neg(e = False):
     else:
         return {"status": "Bad"}
 
+@amo_exception
 @app.route('/api/init')
 def init():
     code = request.args.get('code')
@@ -66,10 +69,12 @@ def init():
     else:
         return redirect(url_for('neg'))
 
+@amo_exception
 @app.route('/api/redirect', methods=['GET'])
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
+@amo_exception
 @app.route('/api/service', methods=['POST', 'GET'])
 def api_service():
     parsed = urlparse.urlparse(request.url)
@@ -85,6 +90,7 @@ def api_service():
 
     return "373" + number[-8:]
 
+@amo_exception
 @app.route('/api/add_custom_fields')
 def add_custom_fields():
     fs = ["name", "phone", "email", "address", "product", "sku"]
@@ -107,6 +113,7 @@ def add_custom_fields():
 
     return pos()
 
+@amo_exception
 @app.route('/api/order/create', methods=['POST', 'GET'])
 def order_create():
     if request.method == "POST":
@@ -152,6 +159,7 @@ def order_create():
 
     return pos()
 
+@amo_exception
 @app.route('/api/order/update', methods=['POST', 'GET'])
 def order_update():
     if request.method == "POST":
@@ -160,6 +168,7 @@ def order_update():
         if not verify:
             return redirect(url_for('neg'))
 
+@amo_exception
 @app.route('/api/order/delete', methods=['POST', 'GET'])
 def order_delete():
     if request.method == "POST":
@@ -172,6 +181,7 @@ def order_delete():
         TELEGRAM.send_message("Order %s has been DELETED" % (data['id']), user.user_id)
     return pos()
 
+@amo_exception
 @app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():
     if request.method == "POST":
@@ -211,6 +221,7 @@ def inventory():
 
     return pos()
 
+@amo_exception
 @app.route('/api/telegram/webhook', methods=['POST'])
 def respond():
     data = json.loads(request.get_data())
@@ -252,7 +263,7 @@ def respond():
         n_status = ""
         if not user.status:
             n_status = "NOT "
-        TELEGRAM.send_message("Status changed, you are %sreceiving notifications" % n_status, user_id)
+        TELEGRAM.send_message("Status changed, you will %sreceive notifications" % n_status, user_id)
 
     elif text == "/delete":
         user = TelegramUsers.query.filter_by(user_id=user_id).first()
@@ -260,8 +271,22 @@ def respond():
         db.session.commit()
         TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to reingage", user_id)
 
+    elif text == "/dev":
+        user = TelegramUsers.query.filter_by(user_id=user_id).first()
+        if user.dev:
+            user.dev = False
+        else:
+            user.dev = True
+        db.session.commit()
+
+        n_status = ""
+        if not user.dev:
+            n_status = "NOT "
+        TELEGRAM.send_message("Status changed, you will %sreceive developer notifications" % n_status, user_id)
+
     return pos()
 
+@amo_exception
 @app.route('/test_sms', methods=['GET', 'POST'])
 def test_sms():
     nr = "078424479"

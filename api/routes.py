@@ -227,65 +227,70 @@ def respond():
     data = json.loads(request.get_data())
     user_id = int(data['message']['from']['id'])
     text = data['message']['text']
-    if text == "/start":
-        if not TelegramUsers.query.filter_by(user_id=user_id).first():
-            user = TelegramUsers(
-                user_id = user_id
-                )
-            db.session.add(user)
+
+    try:
+        if text == "/start":
+            if not TelegramUsers.query.filter_by(user_id=user_id).first():
+                user = TelegramUsers(
+                    user_id = user_id
+                    )
+                db.session.add(user)
+                db.session.commit()
+                TELEGRAM.send_message("Initialisation successful, you will receive notifications. Use /help for more commands", user_id)
+            else:
+                TELEGRAM.send_message("You have already been initialised, you will receive notifications", user_id)
+
+        elif text == "/help":
+            help_message = """
+            /help - List of commands
+            /start - Initialise app and user
+            /info - Receive current user information
+            /delete - Remove user
+            /toggle - Toggle notifications
+            /dev - Receive developer notifications
+            """
+            TELEGRAM.send_message(help_message, user_id)
+
+        elif text == "/info":
+            user = TelegramUsers.query.filter_by(user_id=user_id).first()
+            n_status = ""
+            if not user.status:
+                n_status = "NOT "
+            TELEGRAM.send_message("You are currently %sreceiving notifications" % n_status, user_id)
+
+        elif text == "/toggle":
+            user = TelegramUsers.query.filter_by(user_id=user_id).first()
+            if user.status:
+                user.status = False
+            else:
+                user.status = True
             db.session.commit()
-            TELEGRAM.send_message("Initialisation successful, you will receive notifications", user_id)
-        else:
-            TELEGRAM.send_message("You have already been initialised, you will receive notifications", user_id)
 
-    elif text == "/help":
-        help_message = """
-        /help - List of commands
-        /start - Initialise app and user
-        /info - Receive current user information
-        /delete - Remove user
-        /toggle - Receive or not notifications
-        """
-        TELEGRAM.send_message(help_message, user_id)
+            n_status = ""
+            if not user.status:
+                n_status = "NOT "
+            TELEGRAM.send_message("Status changed, you will %sreceive notifications" % n_status, user_id)
 
-    elif text == "/info":
-        user = TelegramUsers.query.filter_by(user_id=user_id).first()
-        n_status = ""
-        if not user.status:
-            n_status = "NOT "
-        TELEGRAM.send_message("You are currently %sreceiving notifications" % n_status, user_id)
+        elif text == "/delete":
+            user = TelegramUsers.query.filter_by(user_id=user_id).first()
+            db.session.delete(user)
+            db.session.commit()
+            TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to reingage", user_id)
 
-    elif text == "/toggle":
-        user = TelegramUsers.query.filter_by(user_id=user_id).first()
-        if user.status:
-            user.status = False
-        else:
-            user.status = True
-        db.session.commit()
+        elif text == "/dev":
+            user = TelegramUsers.query.filter_by(user_id=user_id).first()
+            if user.dev:
+                user.dev = False
+            else:
+                user.dev = True
+            db.session.commit()
 
-        n_status = ""
-        if not user.status:
-            n_status = "NOT "
-        TELEGRAM.send_message("Status changed, you will %sreceive notifications" % n_status, user_id)
-
-    elif text == "/delete":
-        user = TelegramUsers.query.filter_by(user_id=user_id).first()
-        db.session.delete(user)
-        db.session.commit()
-        TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to reingage", user_id)
-
-    elif text == "/dev":
-        user = TelegramUsers.query.filter_by(user_id=user_id).first()
-        if user.dev:
-            user.dev = False
-        else:
-            user.dev = True
-        db.session.commit()
-
-        n_status = ""
-        if not user.dev:
-            n_status = "NOT "
-        TELEGRAM.send_message("Status changed, you will %sreceive developer notifications" % n_status, user_id)
+            n_status = ""
+            if not user.dev:
+                n_status = "NOT "
+            TELEGRAM.send_message("Status changed, you will %sreceive developer notifications" % n_status, user_id)
+    except AttributeError:
+        return neg()
 
     return pos()
 

@@ -25,3 +25,6 @@ class Shopify:
             query = '?' + urlencode({'inventory_item_ids': item_id})
             return self._make_api_request('inventory_levels', query=query)
         return self._make_api_request('inventory_levels')
+
+    def get_orders(self) -> dict:
+        return self._make_api_request('orders')

@@ -1,4 +1,4 @@
-import requests, json, hmac, hashlib, base64, random
+import requests, json, random
 import urllib.parse as urlparse
 from os import getenv
 from flask import request, redirect, url_for
@@ -6,13 +6,6 @@ from flask import request, redirect, url_for
 from api import *
 from .adj import *
 from .models import Tokens
-
-def verify_webhook(data, hmac_header):
-    digest = hmac.new(getenv('SPF_SECRET').encode('utf-8'), data, hashlib.sha256).digest()
-    computed_hmac = base64.b64encode(digest)
-    return hmac.compare_digest(computed_hmac, hmac_header.encode('utf-8'))
-
-def pos(): return {"status": "Nice"}, 200
 
 @app.errorhandler(500)
 @app.errorhandler(501)
@@ -151,13 +144,12 @@ def order_create():
 
     for i, p in enumerate(products):
         try:
-            color = p['variant_title']
+            variant = p['variant_title']
         except KeyError:
             c = False
         prod_text = f"Produs {i + 1}\nTitle: {p['title']}\nSku: {p['sku']}"
-        if color:
-            prod_text += f"\nCuloarea: {color}"
-        print(color, prod_text)
+        if variant:
+            prod_text += f"\nCuloarea: {variant}"
 
         objects = [
             {

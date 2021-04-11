@@ -8,7 +8,7 @@ from .adj import *
 from .models import Tokens
 
 def verify_webhook(data, hmac_header):
-    digest = hmac.new(getenv('SPF_SECRET'), data.encode('utf-8'), hashlib.sha256).digest()
+    digest = hmac.new(getenv('SPF_SECRET').encode('utf-8'), data, hashlib.sha256).digest()
     computed_hmac = base64.b64encode(digest)
     return hmac.compare_digest(computed_hmac, hmac_header.encode('utf-8'))
 
@@ -124,7 +124,7 @@ def add_custom_fields():
 def order_create():
     if request.method == "POST":
         data = json.loads(request.get_data())
-        verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
+        verify = verify_webhook(request.get_data(), request.headers.get('X-Shopify-Hmac-SHA256'))
         if not verify:
             return redirect(url_for('neg'))
 
@@ -153,14 +153,11 @@ def order_create():
         try:
             color = p['variant_title']
         except KeyError:
-            color = False
-        prod_text = f"""
-            Produs {i + 1}\n
-            Title: {p['title']}\n
-            Sku: {p['sku']}
-        """
+            c = False
+        prod_text = f"Produs {i + 1}\nTitle: {p['title']}\nSku: {p['sku']}"
         if color:
-            prod_text += f"\nCuloarea: {p['culoarea']}"
+            prod_text += f"\nCuloarea: {color}"
+        print(color, prod_text)
 
         objects = [
             {
@@ -182,16 +179,17 @@ def order_create():
 def order_update():
     if request.method == "POST":
         data = json.loads(request.get_data())
-        verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
+        verify = verify_webhook(request.get_data(), request.headers.get('X-Shopify-Hmac-SHA256'))
         if not verify:
             return redirect(url_for('neg'))
+    return pos()
 
 @amo_exception
 @app.route('/api/order/delete', methods=['POST', 'GET'])
 def order_delete():
     if request.method == "POST":
         data = json.loads(request.get_data())
-        verify = verify_webhook(data, request.headers.get('X-Shopify-Hmac-SHA256'))
+        verify = verify_webhook(request.get_data(), request.headers.get('X-Shopify-Hmac-SHA256'))
         if not verify:
             return redirect(url_for('neg'))
 
@@ -293,7 +291,7 @@ def respond():
             user = TelegramUsers.query.filter_by(user_id=user_id).first()
             db.session.delete(user)
             db.session.commit()
-            TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to reingage", user_id)
+            TELEGRAM.send_message("Removal successful, you will no longer receive notifications. Use '/start' to re-engage", user_id)
 
         elif text == "/dev":
             user = TelegramUsers.query.filter_by(user_id=user_id).first()

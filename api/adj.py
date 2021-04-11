@@ -7,7 +7,7 @@ def amo_exception(func):
     def _handle(*args, **kwargs):
         try:
             func(*args, **kwargs)
-        except AmoException:
+        except:
             for user in TelegramUsers.query.filter_by(dev=True).all():
                 TELEGRAM.send_message(
                     "AMO Tokens Unavailable\n",

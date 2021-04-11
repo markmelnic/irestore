@@ -28,6 +28,12 @@ def neg(e = False):
         return {"status": "Bad"}
 
 @amo_exception
+@app.route('/test')
+def test():
+    res = SPF.get_orders()
+    return res if res else pos()
+
+@amo_exception
 @app.route('/api/init')
 def init():
     code = request.args.get('code')
@@ -144,12 +150,24 @@ def order_create():
     lead = AMO.create_leads(objects)
 
     for i, p in enumerate(products):
+        try:
+            color = p['variant_title']
+        except KeyError:
+            color = False
+        prod_text = f"""
+            Produs {i + 1}\n
+            Title: {p['title']}\n
+            Sku: {p['sku']}
+        """
+        if color:
+            prod_text += f"\nCuloarea: {p['culoarea']}"
+
         objects = [
             {
                 "entity_id": lead['_embedded']['leads'][0]['id'],
                 "note_type": "common",
                 "params": {
-                    "text": f"Produs {i + 1}\nTitle: {p['title']}\nSku: {p['sku']}",
+                    "text": prod_text,
                 }
             }
         ]

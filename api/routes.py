@@ -11,22 +11,27 @@ from .models import Tokens
 @app.errorhandler(501)
 @app.errorhandler(502)
 @app.errorhandler(503)
-@amo_exception
 @app.route('/api/neg')
 def neg(e = False):
+    for user in TelegramUsers.query.filter_by(dev=True).all():
+        TELEGRAM.send_message(
+            "An error has occured, please check the logs." +
+            "In case AMO tokens have failed, follow this link:\n" +
+            'https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message',
+            user
+            )
+
     if e:
         message = str(e)[4:].split(":")
         return {"code": e.code, "reason": message[0], "message": message[1][1:]}
     else:
         return {"status": "Bad"}
 
-@amo_exception
 @app.route('/test')
 def test():
-    res = SPF.get_orders()
+    res = AMO.get_orders()
     return res if res else pos()
 
-@amo_exception
 @app.route('/api/init')
 def init():
     code = request.args.get('code')
@@ -68,12 +73,10 @@ def init():
     else:
         return redirect(url_for('neg'))
 
-@amo_exception
 @app.route('/api/redirect', methods=['GET'])
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
-@amo_exception
 @app.route('/api/service', methods=['POST', 'GET'])
 def api_service():
     parsed = urlparse.urlparse(request.url)
@@ -89,7 +92,6 @@ def api_service():
 
     return "373" + number[-8:]
 
-@amo_exception
 @app.route('/api/add_custom_fields')
 def add_custom_fields():
     fs = ["name", "phone", "email", "address", "product", "sku"]
@@ -112,7 +114,6 @@ def add_custom_fields():
 
     return pos()
 
-@amo_exception
 @app.route('/api/order/create', methods=['POST', 'GET'])
 def order_create():
     if request.method == "POST":
@@ -149,7 +150,7 @@ def order_create():
             c = False
         prod_text = f"Produs {i + 1}\nTitle: {p['title']}\nSku: {p['sku']}"
         if variant:
-            prod_text += f"\nCuloarea: {variant}"
+            prod_text += f"\nVersiunea: {variant}"
 
         objects = [
             {
@@ -167,7 +168,6 @@ def order_create():
 
     return pos()
 
-@amo_exception
 @app.route('/api/order/update', methods=['POST', 'GET'])
 def order_update():
     if request.method == "POST":
@@ -177,7 +177,6 @@ def order_update():
             return redirect(url_for('neg'))
     return pos()
 
-@amo_exception
 @app.route('/api/order/delete', methods=['POST', 'GET'])
 def order_delete():
     if request.method == "POST":
@@ -190,7 +189,6 @@ def order_delete():
         TELEGRAM.send_message("Order %s has been DELETED" % (data['id']), user.user_id)
     return pos()
 
-@amo_exception
 @app.route('/api/inventory', methods=['POST', 'GET'])
 def inventory():
     if request.method == "POST":
@@ -230,7 +228,6 @@ def inventory():
 
     return pos()
 
-@amo_exception
 @app.route('/api/telegram/webhook', methods=['POST'])
 def respond():
     data = json.loads(request.get_data())
@@ -303,7 +300,6 @@ def respond():
 
     return pos()
 
-@amo_exception
 @app.route('/test_sms', methods=['GET', 'POST'])
 def test_sms():
     nr = "078424479"

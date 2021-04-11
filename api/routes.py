@@ -170,7 +170,8 @@ def order_create():
         ]
         AMO.create_lead_note(objects)
 
-    TELEGRAM.send_message("O comanda noua a fost plasata\n%s" % (order_url))
+    for user in TelegramUsers.query.filter_by(status=True).all():
+        TELEGRAM.send_message("O comanda noua a fost plasata\n%s" % (order_url), user.user_id)
 
     return pos()
 

@@ -7,3 +7,4 @@ venv
 *.json
 envars.py
 __pycache__
+migrations

@@ -6,6 +6,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
 from amocrm_api import AmoOAuthClient
+from flask_migrate import Migrate
 
 from api import envars
 from .shopify_api import Shopify
@@ -16,6 +17,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = getenv('SQLALCHEMY_DATABASE_URI')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 from .models import *
 

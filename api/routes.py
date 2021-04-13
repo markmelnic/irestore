@@ -18,8 +18,7 @@ def neg(e = False):
             "An error has occured, please check the logs." +
             "In case AMO tokens have failed, follow this link:\n" +
             'https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message',
-            user
-            )
+            user)
 
     if e:
         message = str(e)[4:].split(":")
@@ -78,19 +77,8 @@ def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
 @app.route('/api/service', methods=['POST', 'GET'])
-def api_service():
-    parsed = urlparse.urlparse(request.url)
-    id = urlparse.parse_qs(parsed.query)['leads[status][0][id]'][0]
-    for c in AMO.get_leads_links(id)['_embedded']['links']:
-        if c ['metadata']['main_contact']:
-            contact_id = c['to_entity_id']
-
-    contact = AMO.get_contact(contact_id)
-    for field in contact['custom_fields_values']:
-        if field['field_code'] == "PHONE":
-            number = field['values'][0]['value']
-
-    return "373" + number[-8:]
+def service():
+    return {"returned": "YES", "json": request.get_json(), "data": request.get_data()}
 
 @app.route('/api/add_custom_fields')
 def add_custom_fields():

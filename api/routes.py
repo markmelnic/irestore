@@ -78,7 +78,6 @@ def api_redirect():
 
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
-    global S
     data = urlparse.parse_qs(request.get_data().decode('utf8'))
 
     lead_title = data['leads[status][0][name]'][0]

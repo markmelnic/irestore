@@ -84,9 +84,9 @@ def service():
 
     lead_title = data['leads[status][0][name]'][0]
     print(lead_title)
-    status_new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))
+    status_new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))['name']
     print(status_new)
-    status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))
+    status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))['name']
     print(status_old)
 
     for user in TelegramUsers.query.filter_by(status=True).all():

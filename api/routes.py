@@ -80,11 +80,11 @@ S = {}
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
     global S
-    data = request.get_data()
-    data = urlparse.unquote(data.decode('utf8'))
+    data = request.get_data().decode('utf8')
+    data = urlparse.parse.parse_qs(urlparse.parse.urlsplit(data).query)
     print(data)
     S = data
-    return {'data': request.get_data()}
+    return {'data': data}
 
 @app.route('/api/service_test', methods=['POST', 'GET'])
 def service():

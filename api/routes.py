@@ -76,17 +76,18 @@ def init():
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
-SERVICE = {}
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
-    data = json.loads(request.get_data())
-    return data
+    data = urlparse.parse_qs(request.get_data().decode('utf8'))
 
-@app.route('/api/service_test', methods=['POST', 'GET'])
-def service_test():
-    return SERVICE
-    print({"returned": "YES", "json": request.get_json(), "data": request.get_data()})
-    return {"returned": "YES", "json": request.get_json(), "data": request.get_data()}
+    lead_title = data['leads[status][0][name]'][0]
+    status_new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))['name']
+    status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))['name']
+
+    for user in TelegramUsers.query.filter_by(status=True).all():
+        TELEGRAM.send_message('Leadul "%s" si-a schimbat statutul de la "%s" la "%s" ' % (lead_title, status_old, status_new), user.user_id)
+
+    return pos()
 
 @app.route('/api/add_custom_fields')
 def add_custom_fields():

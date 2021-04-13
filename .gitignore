@@ -8,3 +8,4 @@ venv
 envars.py
 __pycache__
 migrations
+!requirements.txt

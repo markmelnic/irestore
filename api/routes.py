@@ -82,8 +82,9 @@ SERVICE2 = {}
 def service():
     global SERVICE
     SERVICE = request.get_data()
+    print(SERVICE)
     SERVICE2 = json.loads(request.get_data())
-    print(SERVICE, SERVICE2)
+    print(SERVICE2)
     return {'data': request.get_data()}
 
 @app.route('/api/service_test', methods=['POST', 'GET'])

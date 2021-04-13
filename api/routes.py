@@ -76,27 +76,18 @@ def init():
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
-S = {'leads[status][0][id]': ['30243125'], 'leads[status][0][name]': ['6112887963832 | iP11gb64002'], 'leads[status][0][status_id]': ['37664488'], 'leads[status][0][old_status_id]': ['37664485'], 'leads[status][0][price]': ['1000'], 'leads[status][0][responsible_user_id]': ['1760815'], 'leads[status][0][last_modified]': ['1618323903'], 'leads[status][0][modified_user_id]': ['1760815'], 'leads[status][0][created_user_id]': ['0'], 'leads[status][0][date_create]': ['1615550712'], 'leads[status][0][pipeline_id]': ['3944278'], 'leads[status][0][account_id]': ['16503244'], 'leads[status][0][created_at]': ['1615550712'], 'leads[status][0][updated_at]': ['1618323903'], 'account[subdomain]': ['irestoremoldova'], 'account[id]': ['16503244'], 'account[_links][self]': ['https://irestoremoldova.amocrm.ru']}
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
-    global S
     data = urlparse.parse_qs(request.get_data().decode('utf8'))
 
     lead_title = data['leads[status][0][name]'][0]
-    print(lead_title)
     status_new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))['name']
-    print(status_new)
     status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))['name']
-    print(status_old)
 
     for user in TelegramUsers.query.filter_by(status=True).all():
         TELEGRAM.send_message('Leadul "%s" si-a schimbat statutul de la "%s" la "%s" ' % (lead_title, status_old, status_new), user.user_id)
 
     return pos()
-
-@app.route('/api/service_test', methods=['POST', 'GET'])
-def service_test():
-    return S
 
 @app.route('/api/add_custom_fields')
 def add_custom_fields():

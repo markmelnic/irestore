@@ -76,6 +76,7 @@ def init():
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
+SERVICE = {}
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
     data = urlparse.parse_qs(request.get_data().decode('utf8'))

@@ -78,6 +78,7 @@ def api_redirect():
 
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
+    print({"returned": "YES", "json": request.get_json(), "data": request.get_data()})
     return {"returned": "YES", "json": request.get_json(), "data": request.get_data()}
 
 @app.route('/api/add_custom_fields')

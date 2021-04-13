@@ -82,7 +82,7 @@ def service():
     global S
     data = request.url
     print(data)
-    data = urlparse.parse.parse_qs(urlparse.parse.urlsplit(data).query)
+    data = urlparse.parse_qs(urlparse.urlsplit(data).query)
     print(data)
     S = data
     return {'data': data}

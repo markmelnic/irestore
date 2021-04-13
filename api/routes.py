@@ -80,9 +80,9 @@ S = {}
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
     global S
-    data = request.url
+    data = request.data
     print(data)
-    data = urlparse.parse_qs(urlparse.urlsplit(data).query)
+    data = urlparse.parse_qs(data)
     print(data)
     S = data
     return {'data': data}

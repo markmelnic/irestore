@@ -190,40 +190,30 @@ def order_delete():
 def inventory():
     if request.method == "POST":
         data = json.loads(request.get_data())
-    else:
-        try:
-            data = json.loads(open("inventory.json", "r").read())
-        except FileNotFoundError:
-            return redirect(url_for('neg'))
-    id = data['inventory_item_id']
 
-    products = SPF.get_products()['products']
-    target = None
-    for p in products:
-        for v in p['variants']:
-            if id == v['inventory_item_id']:
-                product = p
-                target = v['product_id']
-                price = v['price']
-                sku = v['sku']
+        id = data['inventory_item_id']
+
+        products = SPF.get_products()['products']
+        target = None
+        for p in products:
+            for v in p['variants']:
+                if id == v['inventory_item_id']:
+                    product = p
+                    target = v['product_id']
+                    price = v['price']
+                    sku = v['sku']
+                    break
+            if target:
                 break
-        if target:
-            break
 
-    title = f"Product id: {target} | SKU: {sku}"
-    object = [{
-        'name': title,
-        'price': int(float(price)),
-        'pipeline_id': PIPELINE,
-    }]
-    AMO.create_leads(object)
+        title = f"Product id: {target} | SKU: {sku}"
 
-    left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
-    if int(left) in [5, 10]:
-        for user in TelegramUsers.query.filter_by(status=True).all():
-            TELEGRAM.send_message("There are %s - %s - items left" % (left, title), user.user_id)
+        left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
+        if int(left) in [5, 10]:
+            for user in TelegramUsers.query.filter_by(status=True).all():
+                TELEGRAM.send_message("There are %s - %s - items left" % (left, title), user.user_id)
 
-    return pos()
+        return pos()
 
 @app.route('/api/telegram/webhook', methods=['POST'])
 def respond():

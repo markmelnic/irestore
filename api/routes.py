@@ -76,8 +76,15 @@ def init():
 def api_redirect():
     return redirect('https://www.amocrm.ru/oauth?client_id='+getenv('CLIENT_ID')+'&state='+getenv('REDIRECT')+'&mode=post_message')
 
+SERVICE = {}
 @app.route('/api/service', methods=['POST', 'GET'])
 def service():
+    data = json.loads(request.get_data())
+    return data
+
+@app.route('/api/service_test', methods=['POST', 'GET'])
+def service_test():
+    return SERVICE
     print({"returned": "YES", "json": request.get_json(), "data": request.get_data()})
     return {"returned": "YES", "json": request.get_json(), "data": request.get_data()}
 

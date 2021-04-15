@@ -28,8 +28,9 @@ def neg(e = False):
 
 @app.route('/test')
 def test():
-    res = AMO.get_orders()
-    return res if res else pos()
+    res = AMO.get_contacts(filters={'[custom_fields_values][field_name]': 1617656000})
+    res = AMO.get_contacts(999)
+    return res
 
 @app.route('/api/init')
 def init():
@@ -81,6 +82,8 @@ def service():
     data = urlparse.parse_qs(request.get_data().decode('utf8'))
 
     lead_title = data['leads[status][0][name]'][0]
+    print(AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0]'])))
+    print(16525558)
     status_new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))['name']
     status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))['name']
 

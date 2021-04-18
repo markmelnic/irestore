@@ -82,20 +82,23 @@ def service():
     data = urlparse.parse_qs(request.get_data().decode('utf8'))
 
     lead_title = data['leads[status][0][name]'][0]
-    print(AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0]'])))
-    print(16525558)
+    #print(AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0]'])))
+    #print(16525558)
     _new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))
     contact_new = _new['account_id']
     status_new = _new['name']
     status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))['name']
 
+    print("new status -", status_new, "contact -", contact_new, status_new == "Livrare")
     if status_new == "Livrare":
         phone = None
         user = AMO.get_contact(int(contact_new))
         for field in user['custom_fields_values']:
             if field['field_code'] == "PHONE":
                 phone = field['field_code']['values'][0]['value']
+                print("PHONE NR> -", phone)
                 SMSClient.send_sms(phone, "Your device has been repaired.")
+                break
 
     for user in TelegramUsers.query.filter_by(status=True).all():
         TELEGRAM.send_message('Leadul "%s" si-a schimbat statutul de la "%s" la "%s" ' % (lead_title, status_old, status_new), user.user_id)

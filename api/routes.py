@@ -84,8 +84,18 @@ def service():
     lead_title = data['leads[status][0][name]'][0]
     print(AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0]'])))
     print(16525558)
-    status_new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))['name']
+    _new = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][status_id]'][0]))
+    contact_new = _new['account_id']
+    status_new = _new['name']
     status_old = AMO.get_pipeline_status(PIPELINE, int(data['leads[status][0][old_status_id]'][0]))['name']
+
+    if status_new == "Livrare":
+        phone = None
+        user = AMO.get_contact(int(contact_new))
+        for field in user['custom_fields_values']:
+            if field['field_code'] == "PHONE":
+                phone = field['field_code']['values'][0]['value']
+                SMSClient.send_sms(phone, "Your device has been repaired.")
 
     for user in TelegramUsers.query.filter_by(status=True).all():
         TELEGRAM.send_message('Leadul "%s" si-a schimbat statutul de la "%s" la "%s" ' % (lead_title, status_old, status_new), user.user_id)
@@ -209,12 +219,12 @@ def inventory():
             if target:
                 break
 
-        title = f"Product id: {target} | SKU: {sku}"
+        prod_title = f"Product id: {target} | SKU: {sku}"
 
         left = SPF.get_inventory_levels(item_id=id)['inventory_levels'][0]['available']
         if int(left) in [5, 10]:
             for user in TelegramUsers.query.filter_by(status=True).all():
-                TELEGRAM.send_message("There are %s - %s - items left" % (left, title), user.user_id)
+                TELEGRAM.send_message("There are %s - %s - items left" % (left, prod_title), user.user_id)
 
         return pos()
 
